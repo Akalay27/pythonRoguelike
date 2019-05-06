@@ -6,12 +6,14 @@ class Map(object):
 
 	MAX_HALLWAY_LENGTH = 20
 	MAX_ITERS = 4
-	MAX_ROOMS = 15
+	MAX_ROOMS = 20
 
 	def __init__(self):
 
 
 		self.rooms = []
+
+		self.loadTextures("textures\\tilemap1.png", 16)
 
 	def loadRooms(self,filename):
 		# seperate txt into array of room configurations
@@ -29,6 +31,7 @@ class Map(object):
 				self.roomConfigurations.append(loadedRoom)
 				loadedRoom = []
 		print(self.roomConfigurations)
+
 
 
 	def generateMap(self):
@@ -279,9 +282,43 @@ class Map(object):
 
 			self.calculateBBox()
 
+	def loadTextures(self,filename,size):
+		img = pygame.image.load(filename)
+
+		textures = []
+		imgWidth, imgHeight = img.get_size()
+
+		for y in range(0,imgHeight,size):
+			for x in range(0,imgWidth,size):
+				tex = pygame.transform.scale(img.subsurface(pygame.Rect(x,y,size,size)),(32,32))
+				textures.append(tex)
+		self.textures = textures
+
+
 
 
 			
+	def generateTextures(self):
+
+		for room in self.rooms:
+
+			for tile in room.tiles:
+
+				nb = self.neighbors(tile.x, tile.y)
+
+				if tile.type == Map.Tile.FLOOR:
+					tile.texture = self.textures[9]
+				if tile.type == Map.Tile.WALL:
+					if nb[2].type == Map.Tile.FLOOR:
+						tile.texture = self.textures[1]
+					if nb[0].type == Map.Tile.FLOOR:
+						tile.texture = pygame.transform.rotate(self.textures[1],90)
+
+
+
+
+
+
 
 	
 			
@@ -296,7 +333,7 @@ class Map(object):
 			self.y = y
 			self.type = t
 			self.direction = -1
-
+			self.texture = None
 
 		def __str__ (self):
 			return "Tile of type {} at {}, {}".format(self.type,self.x,self.y)

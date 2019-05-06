@@ -23,7 +23,7 @@ class Game:
 		self.map.loadRooms("rooms.txt")
 		self.map.generateMap()
 		self.map.printMap()
-		
+		self.map.generateTextures()
 		self.player.pos.x = (self.map.rooms[0].bbox.x2-self.map.rooms[0].bbox.x1)/2*self.tileSize+self.tileSize*0.5
 		self.player.pos.y = (self.map.rooms[0].bbox.y2-self.map.rooms[0].bbox.y1)/2*self.tileSize+self.tileSize*0.5
 		
@@ -42,8 +42,8 @@ class Game:
 					sys.exit()			
 
 			self.drawMap()
-			self.cameraPos.x,self.cameraPos.y = self.player.pos.x,self.player.pos.y
-			#self.cameraPos.x,self.cameraPos.y = lerp(self.cameraPos.x,self.player.pos.x,0.01), lerp(self.cameraPos.y,self.player.pos.y,0.01)
+			#self.cameraPos.x,self.cameraPos.y = self.player.pos.x,self.player.pos.y
+			self.cameraPos.x,self.cameraPos.y = lerp(self.cameraPos.x,self.player.pos.x,0.01), lerp(self.cameraPos.y,self.player.pos.y,0.01)
 			self.player.draw(self)
 			self.player.move(self)
 			#self.map.generateMap()
@@ -64,12 +64,11 @@ class Game:
 		for y in range(cameraTilePos.y-tileRangeY,cameraTilePos.y+tileRangeY):
 			for x in range(cameraTilePos.x-tileRangeX,cameraTilePos.x+tileRangeX):
 				drawPos = self.getCameraPoint(Point(x*self.tileSize,y*self.tileSize))
-				if self.map.tileAt(x, y).type == Map.Tile.WALL:
-					pygame.draw.rect(self.screen,(0,0,255),(drawPos[0],drawPos[1],self.tileSize,self.tileSize))
-				elif self.map.tileAt(x, y).type == Map.Tile.FLOOR:
-					pygame.draw.rect(self.screen,(0,0,100),(drawPos[0],drawPos[1],self.tileSize,self.tileSize))
-				elif self.map.tileAt(x, y).type == Map.Tile.DOOR:
-					pygame.draw.rect(self.screen,(100,0,100),(drawPos[0],drawPos[1],self.tileSize,self.tileSize))
+				
+				tile = self.map.tileAt(x, y)
+
+				if tile.texture != None:
+					self.screen.blit(tile.texture,(drawPos[0],drawPos[1]))
 class Player:
 	
 	def __init__(self, x, y):
