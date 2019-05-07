@@ -301,7 +301,6 @@ class Map(object):
 
 			
 	def generateTextures(self):
-
 		for room in self.rooms:
 
 			for tile in room.tiles:
@@ -335,6 +334,9 @@ class Map(object):
 						tile.texture = pygame.transform.rotate(self.textures[1],-90)
 					elif nb[6].type == Map.Tile.FLOOR or nb[6].type == Map.Tile.DOOR:
 						tile.texture = pygame.transform.rotate(self.textures[1],180)
+
+				#if tile.type == Map.Tile.FLOOR:
+
 
 
 

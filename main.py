@@ -42,8 +42,8 @@ class Game:
 					sys.exit()			
 
 			
-			self.cameraPos.x,self.cameraPos.y = self.player.pos.x,self.player.pos.y
-			#self.cameraPos.x,self.cameraPos.y = lerp(self.cameraPos.x,self.player.pos.x,0.01), lerp(self.cameraPos.y,self.player.pos.y,0.01)
+			#self.cameraPos.x,self.cameraPos.y = self.player.pos.x,self.player.pos.y
+			self.cameraPos.x,self.cameraPos.y = lerp(self.cameraPos.x,self.player.pos.x,0.01), lerp(self.cameraPos.y,self.player.pos.y,0.01)
 			self.map.draw(self)
 			self.player.draw(self)
 			self.player.move(self)
