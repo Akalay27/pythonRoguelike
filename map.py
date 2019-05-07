@@ -2,11 +2,13 @@ from util import *
 import random
 import pygame
 import math
+
 class Map(object):
 
 	MAX_HALLWAY_LENGTH = 20
 	MAX_ITERS = 4
-	MAX_ROOMS = 20
+	MAX_ROOMS = 30
+	tileSize = 64
 
 	def __init__(self):
 
@@ -290,7 +292,7 @@ class Map(object):
 
 		for y in range(0,imgHeight,size):
 			for x in range(0,imgWidth,size):
-				tex = pygame.transform.scale(img.subsurface(pygame.Rect(x,y,size,size)),(32,32))
+				tex = pygame.transform.scale(img.subsurface(pygame.Rect(x,y,size,size)),(self.tileSize,self.tileSize))
 				textures.append(tex)
 		self.textures = textures
 
@@ -306,18 +308,50 @@ class Map(object):
 
 				nb = self.neighbors(tile.x, tile.y)
 
-				if tile.type == Map.Tile.FLOOR:
-					tile.texture = self.textures[9]
-				if tile.type == Map.Tile.WALL:
-					if nb[2].type == Map.Tile.FLOOR:
+				if tile.type == Map.Tile.FLOOR or tile.type == Map.Tile.DOOR:
+					tile.texture = self.textures[18]
+				if tile.type == Map.Tile.WALL: #all of the textures
+					if nb[0].type == Map.Tile.WALL and nb[2].type == Map.Tile.WALL and (nb[1].type == Map.Tile.FLOOR or nb[1].type == Map.Tile.DOOR):
+						tile.texture = self.textures[0]
+					elif nb[2].type == Map.Tile.WALL and nb[4].type == Map.Tile.WALL and (nb[3].type == Map.Tile.FLOOR or nb[3].type == Map.Tile.DOOR):
+						tile.texture = pygame.transform.rotate(self.textures[0],-90)
+					elif nb[4].type == Map.Tile.WALL and nb[6].type == Map.Tile.WALL and (nb[5].type == Map.Tile.FLOOR or nb[5].type == Map.Tile.DOOR):
+						tile.texture = pygame.transform.rotate(self.textures[0],-180)
+					elif nb[6].type == Map.Tile.WALL and nb[0].type == Map.Tile.WALL and (nb[7].type == Map.Tile.FLOOR or nb[7].type == Map.Tile.DOOR):
+						tile.texture = pygame.transform.rotate(self.textures[0],90)
+					elif nb[6].type == Map.Tile.WALL and nb[4].type == Map.Tile.WALL and (nb[0].type == Map.Tile.FLOOR or nb[0].type == Map.Tile.DOOR) and (nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR):
+						tile.texture = self.textures[16]
+					elif nb[6].type == Map.Tile.WALL and nb[0].type == Map.Tile.WALL and (nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR) and (nb[4].type == Map.Tile.FLOOR or nb[4].type == Map.Tile.DOOR):
+						tile.texture = pygame.transform.rotate(self.textures[16],-90)
+					elif nb[0].type == Map.Tile.WALL and nb[2].type == Map.Tile.WALL and (nb[4].type == Map.Tile.FLOOR or nb[4].type == Map.Tile.DOOR) and (nb[6].type == Map.Tile.FLOOR or nb[6].type == Map.Tile.DOOR):
+						tile.texture = pygame.transform.rotate(self.textures[16],-180)
+					elif nb[2].type == Map.Tile.WALL and nb[4].type == Map.Tile.WALL and (nb[6].type == Map.Tile.FLOOR or nb[6].type == Map.Tile.DOOR) and (nb[0].type == Map.Tile.FLOOR or nb[0].type == Map.Tile.DOOR):
+						tile.texture = pygame.transform.rotate(self.textures[16],90)
+					elif nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR:
 						tile.texture = self.textures[1]
-					if nb[0].type == Map.Tile.FLOOR:
+					elif nb[0].type == Map.Tile.FLOOR or nb[0].type == Map.Tile.DOOR:
 						tile.texture = pygame.transform.rotate(self.textures[1],90)
+					elif nb[4].type == Map.Tile.FLOOR or nb[4].type == Map.Tile.DOOR:
+						tile.texture = pygame.transform.rotate(self.textures[1],-90)
+					elif nb[6].type == Map.Tile.FLOOR or nb[6].type == Map.Tile.DOOR:
+						tile.texture = pygame.transform.rotate(self.textures[1],180)
 
 
 
+	def draw(self,game):
+		tileRangeY = math.ceil(game.CANVAS_HEIGHT/self.tileSize/2)+1
+		tileRangeX = math.ceil(game.CANVAS_WIDTH/self.tileSize/2)+1
+		cameraTilePos = Point(int(game.cameraPos.x/self.tileSize), int(game.cameraPos.y/self.tileSize))
+		
+		
+		for y in range(cameraTilePos.y-tileRangeY,cameraTilePos.y+tileRangeY):
+			for x in range(cameraTilePos.x-tileRangeX,cameraTilePos.x+tileRangeX):
+				drawPos = game.getCameraPoint(Point(x*self.tileSize,y*self.tileSize))
+				
+				tile = self.tileAt(x, y)
 
-
+				if tile.texture != None:
+					game.screen.blit(tile.texture,(drawPos[0],drawPos[1]))
 
 
 	
@@ -334,6 +368,8 @@ class Map(object):
 			self.type = t
 			self.direction = -1
 			self.texture = None
+
+
 
 		def __str__ (self):
 			return "Tile of type {} at {}, {}".format(self.type,self.x,self.y)
