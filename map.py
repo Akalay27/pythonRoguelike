@@ -15,7 +15,7 @@ class Map(object):
 
 		self.rooms = []
 
-		self.loadTextures("textures\\tilemap1.png", 16)
+		self.loadTextures("textures\\tilemap2.png", 16)
 
 	def loadRooms(self,filename):
 		# seperate txt into array of room configurations
@@ -104,6 +104,8 @@ class Map(object):
 			self.roomArray.append(self)
 			self.iterationStep = iterationStep
 			self.numberOfChildren = 1
+
+
 		def generateRoom(self):
 			'''chooses room configuration from Map's room file'''
 			self.tiles = []
@@ -307,33 +309,63 @@ class Map(object):
 
 				nb = self.neighbors(tile.x, tile.y)
 
+				# if tile.type == Map.Tile.FLOOR or tile.type == Map.Tile.DOOR:
+				# 	tile.texture = self.textures[18]
+				# if tile.type == Map.Tile.WALL: #all of the textures
+				# 	if nb[0].type == Map.Tile.WALL and nb[2].type == Map.Tile.WALL and (nb[1].type == Map.Tile.FLOOR or nb[1].type == Map.Tile.DOOR):
+				# 		tile.texture = self.textures[0]
+				# 	elif nb[2].type == Map.Tile.WALL and nb[4].type == Map.Tile.WALL and (nb[3].type == Map.Tile.FLOOR or nb[3].type == Map.Tile.DOOR):
+				# 		tile.texture = pygame.transform.rotate(self.textures[0],-90)
+				# 	elif nb[4].type == Map.Tile.WALL and nb[6].type == Map.Tile.WALL and (nb[5].type == Map.Tile.FLOOR or nb[5].type == Map.Tile.DOOR):
+				# 		tile.texture = pygame.transform.rotate(self.textures[0],-180)
+				# 	elif nb[6].type == Map.Tile.WALL and nb[0].type == Map.Tile.WALL and (nb[7].type == Map.Tile.FLOOR or nb[7].type == Map.Tile.DOOR):
+				# 		tile.texture = pygame.transform.rotate(self.textures[0],90)
+				# 	elif nb[6].type == Map.Tile.WALL and nb[4].type == Map.Tile.WALL and (nb[0].type == Map.Tile.FLOOR or nb[0].type == Map.Tile.DOOR) and (nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR):
+				# 		tile.texture = self.textures[16]
+				# 	elif nb[6].type == Map.Tile.WALL and nb[0].type == Map.Tile.WALL and (nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR) and (nb[4].type == Map.Tile.FLOOR or nb[4].type == Map.Tile.DOOR):
+				# 		tile.texture = pygame.transform.rotate(self.textures[16],-90)
+				# 	elif nb[0].type == Map.Tile.WALL and nb[2].type == Map.Tile.WALL and (nb[4].type == Map.Tile.FLOOR or nb[4].type == Map.Tile.DOOR) and (nb[6].type == Map.Tile.FLOOR or nb[6].type == Map.Tile.DOOR):
+				# 		tile.texture = pygame.transform.rotate(self.textures[16],-180)
+				# 	elif nb[2].type == Map.Tile.WALL and nb[4].type == Map.Tile.WALL and (nb[6].type == Map.Tile.FLOOR or nb[6].type == Map.Tile.DOOR) and (nb[0].type == Map.Tile.FLOOR or nb[0].type == Map.Tile.DOOR):
+				# 		tile.texture = pygame.transform.rotate(self.textures[16],90)
+				# 	elif nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR:
+				# 		tile.texture = self.textures[1]
+				# 	elif nb[0].type == Map.Tile.FLOOR or nb[0].type == Map.Tile.DOOR:
+				# 		tile.texture = pygame.transform.rotate(self.textures[1],90)
+				# 	elif nb[4].type == Map.Tile.FLOOR or nb[4].type == Map.Tile.DOOR:
+				# 		tile.texture = pygame.transform.rotate(self.textures[1],-90)
+				# 	elif nb[6].type == Map.Tile.FLOOR or nb[6].type == Map.Tile.DOOR:
+				# 		tile.texture = pygame.transform.rotate(self.textures[1],180)
+
+
 				if tile.type == Map.Tile.FLOOR or tile.type == Map.Tile.DOOR:
-					tile.texture = self.textures[18]
-				if tile.type == Map.Tile.WALL: #all of the textures
-					if nb[0].type == Map.Tile.WALL and nb[2].type == Map.Tile.WALL and (nb[1].type == Map.Tile.FLOOR or nb[1].type == Map.Tile.DOOR):
-						tile.texture = self.textures[0]
-					elif nb[2].type == Map.Tile.WALL and nb[4].type == Map.Tile.WALL and (nb[3].type == Map.Tile.FLOOR or nb[3].type == Map.Tile.DOOR):
-						tile.texture = pygame.transform.rotate(self.textures[0],-90)
-					elif nb[4].type == Map.Tile.WALL and nb[6].type == Map.Tile.WALL and (nb[5].type == Map.Tile.FLOOR or nb[5].type == Map.Tile.DOOR):
-						tile.texture = pygame.transform.rotate(self.textures[0],-180)
-					elif nb[6].type == Map.Tile.WALL and nb[0].type == Map.Tile.WALL and (nb[7].type == Map.Tile.FLOOR or nb[7].type == Map.Tile.DOOR):
-						tile.texture = pygame.transform.rotate(self.textures[0],90)
-					elif nb[6].type == Map.Tile.WALL and nb[4].type == Map.Tile.WALL and (nb[0].type == Map.Tile.FLOOR or nb[0].type == Map.Tile.DOOR) and (nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR):
-						tile.texture = self.textures[16]
-					elif nb[6].type == Map.Tile.WALL and nb[0].type == Map.Tile.WALL and (nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR) and (nb[4].type == Map.Tile.FLOOR or nb[4].type == Map.Tile.DOOR):
-						tile.texture = pygame.transform.rotate(self.textures[16],-90)
-					elif nb[0].type == Map.Tile.WALL and nb[2].type == Map.Tile.WALL and (nb[4].type == Map.Tile.FLOOR or nb[4].type == Map.Tile.DOOR) and (nb[6].type == Map.Tile.FLOOR or nb[6].type == Map.Tile.DOOR):
-						tile.texture = pygame.transform.rotate(self.textures[16],-180)
-					elif nb[2].type == Map.Tile.WALL and nb[4].type == Map.Tile.WALL and (nb[6].type == Map.Tile.FLOOR or nb[6].type == Map.Tile.DOOR) and (nb[0].type == Map.Tile.FLOOR or nb[0].type == Map.Tile.DOOR):
-						tile.texture = pygame.transform.rotate(self.textures[16],90)
-					elif nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR:
-						tile.texture = self.textures[1]
-					elif nb[0].type == Map.Tile.FLOOR or nb[0].type == Map.Tile.DOOR:
-						tile.texture = pygame.transform.rotate(self.textures[1],90)
-					elif nb[4].type == Map.Tile.FLOOR or nb[4].type == Map.Tile.DOOR:
-						tile.texture = pygame.transform.rotate(self.textures[1],-90)
-					elif nb[6].type == Map.Tile.FLOOR or nb[6].type == Map.Tile.DOOR:
-						tile.texture = pygame.transform.rotate(self.textures[1],180)
+					tile.texture = self.textures[3]
+
+				if tile.type == Map.Tile.WALL:
+					if nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR:
+
+						tile.texture = self.textures[2]
+
+						wallSeg2 = self.tileAt(tile.x, tile.y-1)
+						wallSeg3 = self.tileAt(tile.x, tile.y-2)
+						wallSeg2.texture = self.textures[1]
+						wallSeg3.texture = self.textures[0]
+						#print(wallSeg2)
+						if wallSeg2.type == None:
+							room.tiles.append(wallSeg2)
+						if wallSeg3.type == None:
+							room.tiles.append(wallSeg3)
+
+						room.calculateBBox()
+						
+
+						
+						wallSeg2.wallSegment = 1
+						
+						#set top wall segment later when all top wall segments are defined
+						wallSeg3.wallSegment = 2
+
+
 
 				#if tile.type == Map.Tile.FLOOR:
 
@@ -371,8 +403,7 @@ class Map(object):
 			self.direction = -1
 			self.texture = None
 
-
-
+			self.wallSegment = -1
 		def __str__ (self):
 			return "Tile of type {} at {}, {}".format(self.type,self.x,self.y)
 		def toPoint(self):
