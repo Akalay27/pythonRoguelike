@@ -317,11 +317,11 @@ class Map(object):
 					tile.texture = self.textures[19]
 
 
-				if tile.type == Map.Tile.WALL:
+				if tile.type == Map.Tile.WALL and tile.texture == None:
 					
 					option = ""
-					for tile in (nb[0],nb[2],nb[4],nb[6]):
-						if tile.type == Map.Tile.WALL:
+					for t in (nb[0],nb[2],nb[4],nb[6]):
+						if t.type == Map.Tile.WALL or t.type == None:
 							option = option + "0"
 						else:
 							option = option + "1"
@@ -338,12 +338,15 @@ class Map(object):
 
 
 
+
 					if nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR:
 
 						tile.texture = self.textures[14]
 
-
-						wallSeg2.texture = self.textures[9]
+						if wallSeg2.texture == None:
+							wallSeg2.texture = self.textures[9]
+						if wallSeg3.texture == None:
+							wallSeg3.texture = topTexture
 						
 						#print(wallSeg2)
 					else:
