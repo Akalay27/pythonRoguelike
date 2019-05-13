@@ -2,10 +2,11 @@ from util import *
 import random
 import pygame
 import math
+from pathlib import Path
 
 class Map(object):
 
-	MAX_HALLWAY_LENGTH = 20
+	MAX_HALLWAY_LENGTH = 30
 	MAX_ITERS = 4
 	MAX_ROOMS = 30
 	tileSize = 64
@@ -17,7 +18,7 @@ class Map(object):
 
 		self.rooms = []
 
-		self.loadTextures("textures\\tilemap3.png", 32)
+		self.loadTextures("textures/tilemap3.png", 32)
 
 	def loadRooms(self,filename):
 		# seperate txt into array of room configurations
@@ -139,21 +140,35 @@ class Map(object):
 					doors.append(t)
 			self.doors = doors
 
-		def getDoorCoordDir(self,direction):
-			'''returns +x,y-, -x,-y etc for each direction 0-3 clockwise'''
-			if direction == 0:
-				moveDir = Point(1,0)
-			elif direction == 1:
-				moveDir = Point(0,1)
-			elif direction == 2:
-				moveDir = Point(-1,0)
+		def getDoorCoordDir(self,direction,twoDirections=False):
+			'''returns +x,y-, -x,-y etc for each direction 0-3 clockwise. If twoDirections is true then only +x or +y'''
+			if twoDirections:
+				if direction == 0 or direction == 2:
+					moveDir = Point(1,0)
+				else:
+					moveDir = Point(0,1)
 			else:
-				moveDir = Point(0,-1)
+				if direction == 0:
+					moveDir = Point(1,0)
+				elif direction == 1:
+					moveDir = Point(0,1)
+				elif direction == 2:
+					moveDir = Point(-1,0)
+				else:
+					moveDir = Point(0,-1)
 			return moveDir
 
-		def calculateBBox(self):
-			'''updates bounding box of the room. This must be called when moving or changing the room configuration'''
+		def calculateBBox(self,collideTest=False):
+			'''updates bounding box of the room. This must be called when moving or changing the room configuration collideTest expands bounding box up 2 and left, right, and bottom sides are expanded 1'''
+			
+
 			self.bbox = Rect(min(t.x for t in self.tiles), min(t.y for t in self.tiles), max(t.x for t in self.tiles), max(t.y for t in self.tiles))
+			
+			if collideTest:
+				self.bbox.x1-=1
+				self.bbox.x2+=1
+				self.bbox.y1-=2
+				self.bbox.y2+=1
 		def setPosition(self,x,y,doorDirection,selected=None):
 			'''sets the position of the room based on a door Tile facing a certain direction or a pre-selected door tile''' 
 			if selected != None:
@@ -173,7 +188,7 @@ class Map(object):
 				t.x+=moveX
 				t.y+=moveY
 
-			self.calculateBBox()
+			self.calculateBBox(collideTest=False)
 			return selectedDoor
 
 		
@@ -235,9 +250,9 @@ class Map(object):
 					if (manhattanDistance(doorTile.toPoint(),selectedDoor.toPoint()) > 1):
 						hallway = Map.Hallway(self.map, self.roomArray)
 						hallway.generateHallway(doorTile,selectedDoor)
-						for room in self.roomArray:
-							if room != hallway:
-								if room.bbox.collidesWithRect(hallway.bbox):
+						for r in self.roomArray:
+							if r != hallway:
+								if r.bbox.collidesWithRect(hallway.bbox):
 									invalidChild = True
 									doorTile.type = Map.Tile.WALL
 									self.roomArray.remove(hallway)
@@ -249,6 +264,16 @@ class Map(object):
 				else:
 					doorTile.type = Map.Tile.DOOR
 					self.children.append(child)
+
+
+					#make 2 doors instead of 1
+
+					secondOffset = self.getDoorCoordDir((doorTile.direction-1)%4,twoDirections=True)
+					secondDoor, secondDoorChild = self.map.tileAt(doorTile.x+secondOffset.x,doorTile.y+secondOffset.y), self.map.tileAt(selectedDoor.x+secondOffset.x,selectedDoor.y+secondOffset.y)
+					secondDoor.type, secondDoorChild.type = Map.Tile.DOOR, Map.Tile.DOOR
+					secondDoor.direction, secondDoorChild.direction = doorTile.direction, selectedDoor.direction
+
+
 
 				#make doors close off also better way of limiting rooms please
 				if len(self.roomArray) > Map.MAX_ROOMS:
@@ -271,24 +296,28 @@ class Map(object):
 
 		def generateHallway(self,tStart,tEnd): #make walls connecting rooms together, NOT including walls adjacent to doors.
 			self.tiles = []
-			moveDir = self.getDoorCoordDir(tStart.direction)
+			moveDir = self.getDoorCoordDir(tStart.direction,twoDirections=True)
 
 			steps = manhattanDistance(tStart.toPoint(), tEnd.toPoint())
-			leftWallDirection = self.getDoorCoordDir(((tStart.direction-1)%4))
-			rightWallDirection = self.getDoorCoordDir(((tStart.direction+1)%4))
+			sideDirection = self.getDoorCoordDir(((tStart.direction-1)%4),twoDirections=True)
+		
 			for i in range(1,steps):
 				stepPosition = Point(tStart.x+moveDir.x*i, tStart.y+moveDir.y*i)
 
-				leftWall = Map.Tile(stepPosition.x+leftWallDirection.x, stepPosition.y+leftWallDirection.y, Map.Tile.WALL)
-				rightWall = Map.Tile(stepPosition.x+rightWallDirection.x, stepPosition.y+rightWallDirection.y, Map.Tile.WALL)
-				floor = Map.Tile(stepPosition.x, stepPosition.y, Map.Tile.FLOOR)
+				leftWall = Map.Tile(stepPosition.x+sideDirection.x*2, stepPosition.y+sideDirection.y*2, Map.Tile.WALL)
+				rightWall = Map.Tile(stepPosition.x-sideDirection.x, stepPosition.y-sideDirection.y, Map.Tile.WALL)
+				floorLeft = Map.Tile(stepPosition.x+sideDirection.x, stepPosition.y+sideDirection.y, Map.Tile.FLOOR)
+				floorRight = Map.Tile(stepPosition.x, stepPosition.y, Map.Tile.FLOOR)
+				self.tiles.append(floorLeft)
+				self.tiles.append(floorRight)
 				self.tiles.append(leftWall)
 				self.tiles.append(rightWall)
-				self.tiles.append(floor)
+				
 
 			self.calculateBBox()
 
 	def loadTextures(self,filename,size):
+		
 		img = pygame.image.load(filename)
 
 		textures = []
@@ -305,28 +334,21 @@ class Map(object):
 
 			
 	def generateTextures(self):
+
+
 		for room in self.rooms:
 
 			for tile in room.tiles:
 
-				nb = self.neighbors(tile.x, tile.y)
-
-
-
-				if tile.type == Map.Tile.FLOOR or tile.type == Map.Tile.DOOR:
+				nb = self.neighbors(tile.x,tile.y)
+				if tile.type == Map.Tile.FLOOR or tile.type == Map.Tile.DOOR and tile.wallType == 0:
 					tile.texture = self.textures[19]
+					pass
 
+				
 
-				if tile.type == Map.Tile.WALL and tile.texture == None:
+				if tile.type == Map.Tile.WALL:
 					
-					option = ""
-					for t in (nb[0],nb[2],nb[4],nb[6]):
-						if t.type == Map.Tile.WALL or t.type == None:
-							option = option + "0"
-						else:
-							option = option + "1"
-
-					topTexture = self.textures[self.borderTypes[option]]
 
 					wallSeg2 = self.tileAt(tile.x, tile.y-1)
 					wallSeg3 = self.tileAt(tile.x, tile.y-2)
@@ -337,22 +359,86 @@ class Map(object):
 						room.tiles.append(wallSeg3)
 
 
+					#if below the floor tiles, then only occlude 1 tile in front. Otherwise occlude 2 like normal
 
-
-					if nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR:
-
+					if nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR: #front facing wall case
 						tile.texture = self.textures[14]
-
-						if wallSeg2.texture == None:
-							wallSeg2.texture = self.textures[9]
-						if wallSeg3.texture == None:
-							wallSeg3.texture = topTexture
+						wallSeg2.texture = self.textures[9]
+						wallSeg3.texture = self.getBorderTexture(nb)
+						wallSeg2.wallType, wallSeg3.wallType, tile.wallType = 2 , 3, 1
 						
-						#print(wallSeg2)
-					else:
+						y = 1
+						
+						while self.tileAt(tile.x,tile.y-y).type == Map.Tile.WALL:
+							nextAbove = self.tileAt(tile.x,tile.y-2-y)
+							if self.roomAt(nextAbove.x,nextAbove.y) != room:
+								break
+							nextAbove.texture = self.getBorderTexture(self.neighbors(tile.x,tile.y-y))
+							nextAbove.wallType = 3
+							y+=1
+							
 
-						tile.texture = topTexture
+
+
+					elif nb[6].type == Map.Tile.FLOOR and (nb[2].type == None or nb[2].type == Map.Tile.WALL) and tile.wallType != 3 and wallSeg2.wallType != 3: #bottom of room case
+						wallSeg2.texture = self.getBorderTexture(self.neighbors(tile.x,tile.y))
+						tile.texture = self.getBorderTexture(self.neighbors(tile.x,tile.y+1))
+						wallSeg2.wallType = 3
+						tile.wallType = 3
+
+					elif tile.wallType == 0: #vertical sides of rooms, find bottom tile of the row and then iterate upwards
+						tile.texture = self.getBorderTexture(nb)
+
+						
+						
+
+						
+						lowestTile = tile
+						ly = 0
+						while self.tileAt(tile.x,tile.y+ly) == Map.Tile.WALL:
+							lowestTile = self.tileAt(tile.x,tile.y+ly)
+							ly+=1
+
+						y = 0
+
+						offset = 1
+						while self.tileAt(lowestTile.x,lowestTile.y-y).type == Map.Tile.WALL and self.tileAt(lowestTile.x,lowestTile.y-y).wallType != 3:
+							nextAbove = self.tileAt(lowestTile.x,lowestTile.y-offset-y)
+							
+
+							if nextAbove.type == Map.Tile.FLOOR:
+								offset = 1
+							if nextAbove.type == None:
+								room.tiles.append(nextAbove)
+								room.calculateBBox()
+							if self.roomAt(nextAbove.x,nextAbove.y) != room or self.neighbors(nextAbove.x,nextAbove.y-2)[6] == Map.Tile.FLOOR:
+								break
+							nextAbove.texture = self.getBorderTexture(self.neighbors(lowestTile.x,lowestTile.y-y))
+							nextAbove.wallType = 3
+							y+=1
+							print(y)
+
+							if y > 0:
+								offset = 2
+
+							
+
 					room.calculateBBox()
+
+					# elif tile.wallType == 0:
+
+					# 	if (nb[0].type == Map.Tile.FLOOR and nb[4].type == None) or (nb[0].type == None or nb[4].type == Map.Tile.FLOOR):
+					# 		tile.texture = self.getBorderTexture(self.neighbors(tile.x,tile.y+1))
+					# 	else:
+					# 		tile.texture = self.getBorderTexture(self.neighbors(tile.x,tile.y+2))
+						
+
+
+
+						
+					
+						
+					
 						
 						#set top wall segment later when all top wall segments are defined
 					
@@ -362,7 +448,17 @@ class Map(object):
 
 				#if tile.type == Map.Tile.FLOOR:
 
+	def getBorderTexture(self,nb):
+		
+		option = ""
+		
+		for t in (nb[0],nb[2],nb[4],nb[6]):
+			if t.type == Map.Tile.WALL or t.type == None:
+				option = option + "0"
+			else:
+				option = option + "1"
 
+		return self.textures[self.borderTypes[option]]
 
 
 	def draw(self,game):
@@ -381,7 +477,14 @@ class Map(object):
 					game.screen.blit(tile.texture,(drawPos[0],drawPos[1]))
 
 
-	
+	# def bakeTextures(self, room=None, tile=None): #turn all textures into 2d array for quick accessing.
+
+
+
+	# 	if room == None and tile == None:
+
+
+
 			
 	class Tile:
 
@@ -394,9 +497,10 @@ class Map(object):
 			self.y = y
 			self.type = t
 			self.direction = -1
+
 			self.texture = None
 
-			self.wallSegment = -1
+			self.wallType = 0 #only for setting correct border tile
 		def __str__ (self):
 			return "Tile of type {} at {}, {}".format(self.type,self.x,self.y)
 		def toPoint(self):
