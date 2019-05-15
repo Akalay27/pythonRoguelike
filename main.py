@@ -13,7 +13,6 @@ class Game:
 
 	def __init__(self):
 		
-		pygame.init()
 
 		self.screen = pygame.display.set_mode((self.CANVAS_WIDTH,self.CANVAS_HEIGHT),pygame.DOUBLEBUF | pygame.HWSURFACE)
 		
@@ -34,7 +33,7 @@ class Game:
 
 
 	def gameLoop(self):
-		while 1:
+		while 1: 
 
 			self.screen.fill((0,0,0))
 			for event in pygame.event.get():
@@ -42,13 +41,12 @@ class Game:
 					sys.exit()			
 
 			
-			#self.cameraPos.x,self.cameraPos.y = self.player.pos.x,self.player.pos.y
-			self.cameraPos.x,self.cameraPos.y = lerp(self.cameraPos.x,self.player.pos.x,0.01), lerp(self.cameraPos.y,self.player.pos.y,0.01)
+			self.cameraPos.x,self.cameraPos.y = self.player.pos.x,self.player.pos.y
+			#self.cameraPos.x,self.cameraPos.y = lerp(self.cameraPos.x,self.player.pos.x,0.01), lerp(self.cameraPos.y,self.player.pos.y,0.01)
 			self.map.draw(self)
 			self.player.draw(self)
 			self.player.move(self)
 			
-			#self.map.generateMap()
 			#put player in center of start room
 
 			
@@ -62,7 +60,7 @@ class Player:
 	
 	def __init__(self, x, y):
 		self.pos = Point(x,y)
-		self.moveSpeed = 3
+		self.moveSpeed = 8
 		self.direction = 0
 
 
