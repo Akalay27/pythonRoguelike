@@ -77,7 +77,7 @@ class Player:
 
 		newPos = Point(self.pos.x,self.pos.y)
 		if pressedKeys[pygame.K_w]:
-			newPos.y-= self.moveSpeed
+			newPos.y-= selsf.moveSpeed
 		if pressedKeys[pygame.K_s]:
 			newPos.y+= self.moveSpeed
 		if pressedKeys[pygame.K_a]:
