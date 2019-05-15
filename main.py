@@ -60,22 +60,22 @@ class Player:
 	
 	def __init__(self, x, y):
 		self.pos = Point(x,y)
-		self.moveSpeed = 8
+		self.moveSpeed = 4
 		self.direction = 0
-
+		self.texture = pygame.transform.scale(pygame.image.load("textures\\maincharacter.png"),(128,128))
 
 	
 	def draw(self,game): 
 		drawPos = game.getCameraPoint(self.pos)
 		pygame.draw.circle(game.screen,(0,0,255),drawPos,5)
-
+		
 	def move(self,game):
 	
 		pressedKeys = pygame.key.get_pressed()
 
 		newPos = Point(self.pos.x,self.pos.y)
 		if pressedKeys[pygame.K_w]:
-			newPos.y-= selsf.moveSpeed
+			newPos.y-= self.moveSpeed
 		if pressedKeys[pygame.K_s]:
 			newPos.y+= self.moveSpeed
 		if pressedKeys[pygame.K_a]:

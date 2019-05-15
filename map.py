@@ -18,7 +18,7 @@ class Map(object):
 
 		self.rooms = []
 
-		self.loadTextures("textures/tilemap3.png", 32)
+		self.loadTextures("textures/tilemapTest1.png", 16)
 
 	def loadRooms(self,filename):
 		# seperate txt into array of room configurations
@@ -260,6 +260,7 @@ class Map(object):
 
 				if invalidChild:
 					self.roomArray.remove(child)
+
 					continue
 				else:
 					doorTile.type = Map.Tile.DOOR
@@ -342,7 +343,7 @@ class Map(object):
 
 				nb = self.neighbors(tile.x,tile.y)
 				if tile.type == Map.Tile.FLOOR or tile.type == Map.Tile.DOOR and tile.wallType == 0:
-					tile.texture = self.textures[19]
+					tile.texture = self.textures[10]
 					pass
 
 				
@@ -362,8 +363,8 @@ class Map(object):
 					#if below the floor tiles, then only occlude 1 tile in front. Otherwise occlude 2 like normal
 
 					if nb[2].type == Map.Tile.FLOOR or nb[2].type == Map.Tile.DOOR: #front facing wall case
-						tile.texture = self.textures[14]
-						wallSeg2.texture = self.textures[9]
+						tile.texture = self.textures[random.randint(5,9)]
+						wallSeg2.texture = self.textures[random.randint(0,4)]
 						wallSeg3.texture = self.getBorderTexture(nb)
 						wallSeg2.wallType, wallSeg3.wallType, tile.wallType = 2 , 3, 1
 						
@@ -458,7 +459,8 @@ class Map(object):
 			else:
 				option = option + "1"
 
-		return self.textures[self.borderTypes[option]]
+		#return self.textures[self.borderTypes[option]]  //WHEN THERE ARE NO BORDER TEXTURES
+		return self.textures[19]
 
 
 	def draw(self,game):
