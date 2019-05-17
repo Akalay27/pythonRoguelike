@@ -3,13 +3,12 @@ import random
 import sys
 from map import *
 from util import *
+from animationController import *
 
 		
 class Game:
 	CANVAS_WIDTH = 1000
 	CANVAS_HEIGHT = 600
-
-
 
 	def __init__(self):
 		
@@ -28,13 +27,16 @@ class Game:
 		
 		self.cameraPos = Point(0,0)
 
-
+		self.clock = pygame.time.Clock()
 		self.gameLoop()
 
 
 	def gameLoop(self):
+		
 		while 1: 
+			self.clock.tick()
 
+			self.deltaTime = 60/(self.clock.get_fps()+0.0001)
 			self.screen.fill((0,0,0))
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
@@ -48,7 +50,7 @@ class Game:
 			self.player.move(self)
 			
 			#put player in center of start room
-
+			print(self.clock.get_fps())
 			
 			pygame.display.flip()
 
@@ -62,29 +64,36 @@ class Player:
 		self.pos = Point(x,y)
 		self.moveSpeed = 4
 		self.direction = 0
-		self.texture = pygame.transform.scale(pygame.image.load("textures\\maincharacter.png"),(128,128))
+		self.animation = AnimationController()
 
+		self.animation.addAnimationState("test", "textures\\testanim.png", 8, 0.1)
+		self.animation.setState("test")
 	
 	def draw(self,game): 
 		drawPos = game.getCameraPoint(self.pos)
-		pygame.draw.circle(game.screen,(0,0,255),drawPos,5)
+		#pygame.draw.circle(game.screen,(0,0,255),drawPos,5)
+
+		game.screen.blit(self.animation.getFrame(),(0,0))
 		
 	def move(self,game):
-	
+		
+		
+
+
 		pressedKeys = pygame.key.get_pressed()
 
 		newPos = Point(self.pos.x,self.pos.y)
 		if pressedKeys[pygame.K_w]:
-			newPos.y-= self.moveSpeed
+			newPos.y-= self.moveSpeed*game.deltaTime
 		if pressedKeys[pygame.K_s]:
-			newPos.y+= self.moveSpeed
+			newPos.y+= self.moveSpeed*game.deltaTime
 		if pressedKeys[pygame.K_a]:
-			newPos.x-= self.moveSpeed
+			newPos.x-= self.moveSpeed*game.deltaTime
 		if pressedKeys[pygame.K_d]:
-			newPos.x+= self.moveSpeed
+			newPos.x+= self.moveSpeed*game.deltaTime
 
 		tile = Point(newPos.x//game.map.tileSize, newPos.y//game.map.tileSize).int()
-		print(tile)
+		
 		if game.map.tileAt(tile[0],tile[1]).type != 1:
 			self.pos = newPos
 

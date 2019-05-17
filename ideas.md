@@ -11,3 +11,6 @@ boss is able to travel through server walls
 
 start of game is the player kicking down the door and letting bright light into the room
 
+MAKE THE FACE OF THE CHARACTER HAVE HALF ROBOT FACE OR MODIFIED FACE
+
+
