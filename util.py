@@ -4,6 +4,7 @@ def lerp(prevVal,newVal,amnt):
 	return prevVal+add
 
 class Point:
+
 	def __init__ (self,x,y):
 		self.x = x
 		self.y = y
@@ -11,6 +12,7 @@ class Point:
 		return int(self.x),int(self.y)
 	def __str__(self):
 		return "({},{})".format(self.x, self.y)
+
 class Rect:
 
 	def __init__ (self,x1,y1,x2,y2):
