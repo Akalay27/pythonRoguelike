@@ -8,7 +8,7 @@ class Map(object):
 
 	MAX_HALLWAY_LENGTH = 30
 	MAX_ITERS = 4
-	MAX_ROOMS = 30
+	MAX_ROOMS = 20
 	tileSize = 64
 
 	borderTypes = {"0000":0,"0011":1,"1001":2,"1100":7,"0110":6,"1010":3,"1000":13,"0010":8,"0101":5,"0100":10,"0001":15,"1111":12,"1011":11,"1110":16,"0111":17,"1101":18}
@@ -35,18 +35,20 @@ class Map(object):
 			else:
 				self.roomConfigurations.append(loadedRoom)
 				loadedRoom = []
-		print(self.roomConfigurations)
-
+		
 
 
 	def generateMap(self):
-		'''creates root room and generates all rooms of the map'''
 		self.rooms = []
-		origin = self.Room(self,self.rooms)
+		'''creates root room and generates all rooms of the map'''
+		while len(self.rooms) < self.MAX_ROOMS:
 
-		origin.generateRoom()
-		#origin.setPosition(-5, -5, 1)
-		origin.createChildren()
+			self.rooms = []
+			origin = self.Room(self,self.rooms)
+
+			origin.generateRoom()
+			#origin.setPosition(-5, -5, 1)
+			origin.createChildren()
 
 	def tileAt(self,x,y,room=None,bbox=None):
 		'''returns Map.Tile at location, returns Map.Tile of type None if no tile found, optionally searching in one specific room or in a rectangular area'''
@@ -165,10 +167,8 @@ class Map(object):
 			self.bbox = Rect(min(t.x for t in self.tiles), min(t.y for t in self.tiles), max(t.x for t in self.tiles), max(t.y for t in self.tiles))
 			
 			if collideTest:
-				self.bbox.x1-=1
-				self.bbox.x2+=1
 				self.bbox.y1-=2
-				self.bbox.y2+=1
+				
 		def setPosition(self,x,y,doorDirection,selected=None):
 			'''sets the position of the room based on a door Tile facing a certain direction or a pre-selected door tile''' 
 			if selected != None:
@@ -202,16 +202,16 @@ class Map(object):
 
 			selectedDoors = []
 
-			self.numberOfChildren = random.randint(1, len(self.doors))
+			# self.numberOfChildren = random.randint(1, len(self.doors))
 
-			while (len(selectedDoors) < self.numberOfChildren):
-				door = self.doors[random.randint(0,len(self.doors)-1)]
+			# while (len(selectedDoors) < self.numberOfChildren):
+			# 	door = self.doors[random.randint(0,len(self.doors)-1)]
 
-				if door not in selectedDoors:
-					selectedDoors.append(door)
+			# 	if door not in selectedDoors:
+			# 		selectedDoors.append(door)
 
 
-
+			selectedDoors = self.doors
 			for doorTile in selectedDoors:
 
 				child = Map.Room(self.map,self.roomArray,self.iterationStep+1)
@@ -235,7 +235,7 @@ class Map(object):
 						if room != child:
 							if room.bbox.collidesWithRect(child.bbox):
 								validPos = False
-					
+								
 					if validPos == True:
 						break
 					if distance == Map.MAX_HALLWAY_LENGTH:
@@ -254,6 +254,7 @@ class Map(object):
 							if r != hallway:
 								if r.bbox.collidesWithRect(hallway.bbox):
 									invalidChild = True
+
 									doorTile.type = Map.Tile.WALL
 									self.roomArray.remove(hallway)
 									break
@@ -298,6 +299,10 @@ class Map(object):
 		def generateHallway(self,tStart,tEnd): #make walls connecting rooms together, NOT including walls adjacent to doors.
 			self.tiles = []
 			moveDir = self.getDoorCoordDir(tStart.direction,twoDirections=True)
+
+			if tStart.x > tEnd.x or tStart.y > tEnd.y:
+				tStart, tEnd = tEnd, tStart
+
 
 			steps = manhattanDistance(tStart.toPoint(), tEnd.toPoint())
 			sideDirection = self.getDoorCoordDir(((tStart.direction-1)%4),twoDirections=True)

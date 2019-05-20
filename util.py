@@ -1,3 +1,4 @@
+import pygame
 def lerp(prevVal,newVal,amnt):
 	difference = (newVal-prevVal)
 	add = difference*amnt
@@ -30,5 +31,13 @@ class Rect:
 def manhattanDistance(p1,p2):
 	return abs(p1.x-p2.x)+abs(p1.y-p2.y)
 
+def sliceTilemap(img,size,scaleSize=None):
+	'''turns tilemap into array of pygame.Surface'''
+	frames = []
 
+	for y in range(0,img.get_height(),size):
+		for x in range(0,img.get_width(),size):
+			if scaleSize != None:
+				frames.append(pygame.transform.scale(img.subsurface((x,y,size,size)),(scaleSize)))
+	return frames
 

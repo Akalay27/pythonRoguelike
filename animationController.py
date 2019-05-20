@@ -7,16 +7,7 @@ class AnimationController(object):
 		
 		self.currentState = None
 
-	def addAnimationState(self,name,filename,size,speed,loop=False):
-
-		tilemap = pygame.image.load(filename)
-
-
-		frames = []
-
-		for y in range(0,tilemap.get_height(),size):
-			for x in range(0,tilemap.get_width(),size):
-				frames.append(tilemap.subsurface((x,y,size,size)))
+	def addAnimationState(self,name,frames,speed,loop=False):
 
 		state = AnimationController.AnimationState(name,frames,speed,loop)
 
@@ -27,9 +18,16 @@ class AnimationController(object):
 			if state.name == name:
 				self.currentState = state
 				state.begin()
+			else:
+				state.active = False
+
 
 	def getFrame(self):
-		return self.currentState.getFrame()
+
+		if self.currentState != None:
+			return self.currentState.getFrame()
+		else:
+			return self.states[0].getFrame()
 
 
 	class AnimationState(object):
@@ -41,15 +39,19 @@ class AnimationController(object):
 			self.active = False
 			self.name = name
 
+			
+			self.stillFrame = len(self.frames) == 1
 
 		def begin(self):
-			self.active = True
-			self.startTime = time.time()
-			self.frame = 0
+			if self.active == False:
+				self.active = True
+				self.startTime = time.time()
+				
 		def getFrame(self):
-
-			frame = int(((time.time()-self.startTime)/self.speed)%len(self.frames))
-
+			if not self.stillFrame:
+				frame = int(((time.time()-self.startTime)/self.speed)%len(self.frames))
+			else:
+				frame = 0
 			return self.frames[frame]
 
 
