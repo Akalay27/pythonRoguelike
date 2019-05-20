@@ -8,7 +8,7 @@ class Map(object):
 
 	MAX_HALLWAY_LENGTH = 30
 	MAX_ITERS = 4
-	MAX_ROOMS = 20
+	MAX_ROOMS = 50
 	tileSize = 64
 
 	borderTypes = {"0000":0,"0011":1,"1001":2,"1100":7,"0110":6,"1010":3,"1000":13,"0010":8,"0101":5,"0100":10,"0001":15,"1111":12,"1011":11,"1110":16,"0111":17,"1101":18}
@@ -348,8 +348,10 @@ class Map(object):
 
 				nb = self.neighbors(tile.x,tile.y)
 				if tile.type == Map.Tile.FLOOR or tile.type == Map.Tile.DOOR and tile.wallType == 0:
+					
+				
 					tile.texture = self.textures[10]
-					pass
+					
 
 				
 
@@ -468,7 +470,7 @@ class Map(object):
 		return self.textures[19]
 
 
-	def draw(self,game):
+	def draw(self,game,background=True):
 		tileRangeY = math.ceil(game.CANVAS_HEIGHT/self.tileSize/2)+1
 		tileRangeX = math.ceil(game.CANVAS_WIDTH/self.tileSize/2)+1
 		cameraTilePos = Point(int(game.cameraPos.x/self.tileSize), int(game.cameraPos.y/self.tileSize))
@@ -476,12 +478,16 @@ class Map(object):
 		
 		for y in range(cameraTilePos.y-tileRangeY,cameraTilePos.y+tileRangeY):
 			for x in range(cameraTilePos.x-tileRangeX,cameraTilePos.x+tileRangeX):
-				drawPos = game.getCameraPoint(Point(x*self.tileSize,y*self.tileSize))
-				
 				tile = self.tileAt(x, y)
+				if (tile.wallType == 2 or tile.wallType == 3) and not background or background:
 
-				if tile.texture != None:
-					game.screen.blit(tile.texture,(drawPos[0],drawPos[1]))
+					drawPos = game.getCameraPoint(Point(x*self.tileSize,y*self.tileSize))
+					
+					
+
+					if tile.texture != None:
+						game.screen.blit(tile.texture,(drawPos[0],drawPos[1]))
+
 
 
 	# def bakeTextures(self, room=None, tile=None): #turn all textures into 2d array for quick accessing.

@@ -13,7 +13,7 @@ class Game:
 	def __init__(self):
 		
 
-		self.screen = pygame.display.set_mode((self.CANVAS_WIDTH,self.CANVAS_HEIGHT),pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.FULLSCREEN)
+		self.screen = pygame.display.set_mode((self.CANVAS_WIDTH,self.CANVAS_HEIGHT),pygame.DOUBLEBUF | pygame.HWSURFACE)
 		
 		self.player = Player(0,0)
 
