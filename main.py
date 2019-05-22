@@ -47,7 +47,7 @@ class Game:
 			self.map.draw(self)
 			self.player.move(self)
 			self.player.draw(self)
-			
+			self.map.draw(self,background=False)
 			
 			#put player in center of start room
 			print(self.clock.get_fps())

@@ -444,7 +444,12 @@ class Map(object):
 
 
 						
-					
+		for room in self.rooms:
+
+			for tile in room.tiles: 
+
+				if tile.wallType in (1,2):
+						tile.type = Map.Tile.WALL			
 						
 					
 						
@@ -467,7 +472,7 @@ class Map(object):
 				option = option + "1"
 
 		#return self.textures[self.borderTypes[option]]  //WHEN THERE ARE NO BORDER TEXTURES
-		return self.textures[19]
+		return self.textures[12]
 
 
 	def draw(self,game,background=True):
@@ -479,7 +484,7 @@ class Map(object):
 		for y in range(cameraTilePos.y-tileRangeY,cameraTilePos.y+tileRangeY):
 			for x in range(cameraTilePos.x-tileRangeX,cameraTilePos.x+tileRangeX):
 				tile = self.tileAt(x, y)
-				if (tile.wallType == 2 or tile.wallType == 3) and not background or background:
+				if (tile.wallType == 3) and not background or background:
 
 					drawPos = game.getCameraPoint(Point(x*self.tileSize,y*self.tileSize))
 					
@@ -490,7 +495,7 @@ class Map(object):
 
 
 
-	# def bakeTextures(self, room=None, tile=None): #turn all textures into 2d array for quick accessing.
+	
 
 
 
