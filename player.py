@@ -32,7 +32,12 @@ class Player:
 	def move(self,game):
 		
 		
-		
+		currentRoom = game.map.roomAt(self.pos.x//game.map.tileSize, self.pos.y//game.map.tileSize)
+
+		currentRoom.setVisibility(visible=True)
+
+
+
 
 		pressedKeys = pygame.key.get_pressed()
 

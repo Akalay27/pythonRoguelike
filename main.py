@@ -18,9 +18,8 @@ class Game:
 		self.player = Player(0,0)
 
 		self.map = Map()
-		self.map.loadRooms("rooms.txt")
-		self.map.generateMap()
-		self.map.generateTextures()
+		
+		
 		self.player.pos.x = (self.map.rooms[0].bbox.x2-self.map.rooms[0].bbox.x1)/2*self.map.tileSize+self.map.tileSize*0.5
 		self.player.pos.y = (self.map.rooms[0].bbox.y2-self.map.rooms[0].bbox.y1)/2*self.map.tileSize+self.map.tileSize*0.5
 		

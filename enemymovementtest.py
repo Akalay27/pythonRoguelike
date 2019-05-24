@@ -18,8 +18,8 @@ while 1:
 	difference = mousePos[0]-pos[0],mousePos[1]-pos[1]
 	angle = math.atan2(difference[1], difference[0])
 
-	pos[0]+=math.cos(angle)*1*(math.sin(t)+1)/5
-	pos[1]+=math.sin(angle)*1*(math.sin(t)+1)/5
+	pos[0]+=math.cos(angle)*0.1*(math.sin(t)+1)/5
+	pos[1]+=math.sin(angle)*0.1*(math.sin(t)+1)/5
 	pygame.display.flip()
 
 
