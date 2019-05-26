@@ -1,4 +1,5 @@
 import main.Point
+
 class Entity(object):
 	"""docstring for Entity"""
 	def __init__(self, x, y, health):
@@ -6,4 +7,10 @@ class Entity(object):
 		self.x = x
 		self.y = y
 		self.health = 20
+
+
+		
+
+
+
 		

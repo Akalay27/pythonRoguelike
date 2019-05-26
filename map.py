@@ -8,7 +8,7 @@ class Map(object):
 
 	MAX_HALLWAY_LENGTH = 30
 	MAX_ITERS = 4
-	MAX_ROOMS = 30
+	MAX_ROOMS = 5
 	tileSize = 64
 
 	borderTypes = {"0000":0,"0011":1,"1001":2,"1100":7,"0110":6,"1010":3,"1000":13,"0010":8,"0101":5,"0100":10,"0001":15,"1111":12,"1011":11,"1110":16,"0111":17,"1101":18}
@@ -17,9 +17,13 @@ class Map(object):
 
 
 		self.rooms = []
-
+		self.loadRooms("rooms.txt")
 		self.loadTextures("textures/tilemapTest1.png", 16)
+		self.generateMap()
+		self.generateTextures()
+		self.combineTiles()
 
+		
 	def loadRooms(self,filename):
 		# seperate txt into array of room configurations
 		file = open("rooms.txt","r")
@@ -35,12 +39,14 @@ class Map(object):
 			else:
 				self.roomConfigurations.append(loadedRoom)
 				loadedRoom = []
-		print(self.roomConfigurations)
-
+		
 
 
 	def generateMap(self):
+		self.rooms = []
 		'''creates root room and generates all rooms of the map'''
+		self.numberOfRooms = 0
+
 		self.rooms = []
 		origin = self.Room(self,self.rooms)
 
@@ -48,21 +54,25 @@ class Map(object):
 		#origin.setPosition(-5, -5, 1)
 		origin.createChildren()
 
-	def tileAt(self,x,y,room=None,bbox=None):
+	def tileAt(self,x,y,room=None,bbox=None,fast=False):
 		'''returns Map.Tile at location, returns Map.Tile of type None if no tile found, optionally searching in one specific room or in a rectangular area'''
-		if room == None:
+		
+		if not fast:
+			if room == None:
 
-			for r in self.rooms:
-				if bbox != None:
-					if not r.bbox.collidesWithRect(bbox): continue
-				if r.bbox.insideOf(x,y):
-					for t in r.tiles:
-						if t.x == x and t.y == y:
-							return t
+				for r in self.rooms:
+					if bbox != None:
+						if not r.bbox.collidesWithRect(bbox): continue
+					if r.bbox.insideOf(x,y):
+						for t in r.tiles:
+							if t.x == x and t.y == y:
+								return t
+			else:
+				for t in room.tiles:
+					if t.x == x and t.y == y:
+						return t
 		else:
-			for t in room.tiles:
-				if t.x == x and t.y == y:
-					return t
+			return self.getTileFromArray(x, y)
 		return Map.Tile(x,y, None)
 	def roomAt(self,x,y):
 		'''returns Map.Room at location, returns Map.Tile of type None if no tile found.'''
@@ -83,6 +93,33 @@ class Map(object):
 		neighbors.append(self.tileAt(x+1,y-1,room))
 		return neighbors
 
+
+	def combineTiles(self):
+		'''for drawing tiles on the screen, using a large 2d array instead of individual objects using search function'''
+		minX, maxX, minY, maxY = 0,0,0,0
+
+
+		for room in self.rooms:
+			for tile in room.tiles:
+
+				if tile.x < minX: minX = tile.x
+				if tile.x > maxX: maxX = tile.x
+				if tile.y < minY: minY = tile.y
+				if tile.y > maxY: maxY = tile.y
+
+		self.bbox = Rect(minX, minY, maxX, maxY)
+
+		self.allTiles = []
+
+		for y in range(minY,maxY+1):
+			row = []
+			for x in range(minX,maxX+1):
+				row.append(self.tileAt(x,y))
+			self.allTiles.append(row)
+	def getTileFromArray(self,x,y):
+		if x >= self.bbox.x1 and x <= self.bbox.x2 and y >= self.bbox.y1 and y <= self.bbox.y2:
+			return self.allTiles[y-self.bbox.y1][x-self.bbox.x1]
+		return Map.Tile(x,y, None)
 
 
 	def printMap(self):
@@ -108,6 +145,10 @@ class Map(object):
 			self.iterationStep = iterationStep
 			self.numberOfChildren = 1
 
+
+		def setVisibility(self,visible):
+			for tile in self.tiles:
+				tile.visible = visible
 
 		def generateRoom(self):
 			'''chooses room configuration from Map's room file'''
@@ -165,10 +206,8 @@ class Map(object):
 			self.bbox = Rect(min(t.x for t in self.tiles), min(t.y for t in self.tiles), max(t.x for t in self.tiles), max(t.y for t in self.tiles))
 			
 			if collideTest:
-				self.bbox.x1-=1
-				self.bbox.x2+=1
 				self.bbox.y1-=2
-				self.bbox.y2+=1
+				
 		def setPosition(self,x,y,doorDirection,selected=None):
 			'''sets the position of the room based on a door Tile facing a certain direction or a pre-selected door tile''' 
 			if selected != None:
@@ -202,16 +241,16 @@ class Map(object):
 
 			selectedDoors = []
 
-			self.numberOfChildren = random.randint(1, len(self.doors))
+			# self.numberOfChildren = random.randint(1, len(self.doors))
 
-			while (len(selectedDoors) < self.numberOfChildren):
-				door = self.doors[random.randint(0,len(self.doors)-1)]
+			# while (len(selectedDoors) < self.numberOfChildren):
+			# 	door = self.doors[random.randint(0,len(self.doors)-1)]
 
-				if door not in selectedDoors:
-					selectedDoors.append(door)
+			# 	if door not in selectedDoors:
+			# 		selectedDoors.append(door)
 
 
-
+			selectedDoors = self.doors
 			for doorTile in selectedDoors:
 
 				child = Map.Room(self.map,self.roomArray,self.iterationStep+1)
@@ -235,7 +274,7 @@ class Map(object):
 						if room != child:
 							if room.bbox.collidesWithRect(child.bbox):
 								validPos = False
-					
+								
 					if validPos == True:
 						break
 					if distance == Map.MAX_HALLWAY_LENGTH:
@@ -254,6 +293,7 @@ class Map(object):
 							if r != hallway:
 								if r.bbox.collidesWithRect(hallway.bbox):
 									invalidChild = True
+
 									doorTile.type = Map.Tile.WALL
 									self.roomArray.remove(hallway)
 									break
@@ -265,7 +305,7 @@ class Map(object):
 				else:
 					doorTile.type = Map.Tile.DOOR
 					self.children.append(child)
-
+					self.map.numberOfRooms+=1
 
 					#make 2 doors instead of 1
 
@@ -277,7 +317,7 @@ class Map(object):
 
 
 				#make doors close off also better way of limiting rooms please
-				if len(self.roomArray) > Map.MAX_ROOMS:
+				if self.map.numberOfRooms > Map.MAX_ROOMS:
 
 					for door in child.doors: #remove other doors of child if child isn't going to have more rooms
 						if door != selectedDoor:
@@ -298,6 +338,10 @@ class Map(object):
 		def generateHallway(self,tStart,tEnd): #make walls connecting rooms together, NOT including walls adjacent to doors.
 			self.tiles = []
 			moveDir = self.getDoorCoordDir(tStart.direction,twoDirections=True)
+
+			if tStart.x > tEnd.x or tStart.y > tEnd.y:
+				tStart, tEnd = tEnd, tStart
+
 
 			steps = manhattanDistance(tStart.toPoint(), tEnd.toPoint())
 			sideDirection = self.getDoorCoordDir(((tStart.direction-1)%4),twoDirections=True)
@@ -343,8 +387,10 @@ class Map(object):
 
 				nb = self.neighbors(tile.x,tile.y)
 				if tile.type == Map.Tile.FLOOR or tile.type == Map.Tile.DOOR and tile.wallType == 0:
+					
+				
 					tile.texture = self.textures[10]
-					pass
+					
 
 				
 
@@ -437,7 +483,12 @@ class Map(object):
 
 
 						
-					
+		for room in self.rooms:
+
+			for tile in room.tiles: 
+
+				if tile.wallType in (1,2):
+						tile.type = Map.Tile.WALL			
 						
 					
 						
@@ -460,10 +511,10 @@ class Map(object):
 				option = option + "1"
 
 		#return self.textures[self.borderTypes[option]]  //WHEN THERE ARE NO BORDER TEXTURES
-		return self.textures[19]
+		return self.textures[12]
 
 
-	def draw(self,game):
+	def draw(self,game,background=True):
 		tileRangeY = math.ceil(game.CANVAS_HEIGHT/self.tileSize/2)+1
 		tileRangeX = math.ceil(game.CANVAS_WIDTH/self.tileSize/2)+1
 		cameraTilePos = Point(int(game.cameraPos.x/self.tileSize), int(game.cameraPos.y/self.tileSize))
@@ -471,15 +522,21 @@ class Map(object):
 		
 		for y in range(cameraTilePos.y-tileRangeY,cameraTilePos.y+tileRangeY):
 			for x in range(cameraTilePos.x-tileRangeX,cameraTilePos.x+tileRangeX):
-				drawPos = game.getCameraPoint(Point(x*self.tileSize,y*self.tileSize))
+				tile = self.tileAt(x, y,fast=True)
 				
-				tile = self.tileAt(x, y)
+				if tile.visible:
+					if (tile.wallType == 3) and not background or background:
 
-				if tile.texture != None:
-					game.screen.blit(tile.texture,(drawPos[0],drawPos[1]))
+						drawPos = game.getCameraPoint(Point(x*self.tileSize,y*self.tileSize))
+					
+					
+
+						if tile.texture != None:
+							game.screen.blit(tile.texture,(drawPos[0],drawPos[1]))
 
 
-	# def bakeTextures(self, room=None, tile=None): #turn all textures into 2d array for quick accessing.
+
+	
 
 
 
@@ -503,6 +560,9 @@ class Map(object):
 			self.texture = None
 
 			self.wallType = 0 #only for setting correct border tile
+
+
+			self.visible = False
 		def __str__ (self):
 			return "Tile of type {} at {}, {}".format(self.type,self.x,self.y)
 		def toPoint(self):
