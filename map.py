@@ -1,6 +1,6 @@
 from util import *
 import random
-import pygame
+#import pygame
 import math
 from pathlib import Path
 
@@ -27,6 +27,8 @@ class Map(object):
 	def loadRooms(self,filename):
 		# seperate txt into array of room configurations
 		file = open("rooms.txt","r")
+	def loadRooms(self,filename):
+
 
 		self.roomConfigurations = []
 
