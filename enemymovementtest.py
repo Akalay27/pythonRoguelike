@@ -1,25 +1,21 @@
 import pygame
 import math
+from main import Game
 pos = [300,300]
 
-size = width,height = (600,600)
 
-screen = pygame.display.set_mode(size)
-t = 0
-while 1:
+screen = game.screen
 
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			sys.exit()			
-	mousePos = pygame.mouse.get_pos()
 
-	pygame.draw.rect(screen,(255,0,0),(pos[0],pos[1],10,10))
+mousePos = pygame.mouse.get_pos()
 
-	difference = mousePos[0]-pos[0],mousePos[1]-pos[1]
-	angle = math.atan2(difference[1], difference[0])
+pygame.draw.rect(screen,(255,0,0),(pos[0],pos[1],10,10))
 
-	pos[0]+=math.cos(angle)*0.1*(math.sin(t)+1)/5
-	pos[1]+=math.sin(angle)*0.1*(math.sin(t)+1)/5
-	pygame.display.flip()
+difference = mousePos[0]-pos[0],mousePos[1]-pos[1]
+angle = math.atan2(difference[1], difference[0])
+
+pos[0]+=math.cos(angle)
+pos[1]+=math.sin(angle)
+
 
 
