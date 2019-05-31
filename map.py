@@ -31,8 +31,8 @@ class Map(object):
 
 
 		self.roomConfigurations = []
-
-		lines = file.readlines() 
+		with open(filename, 'r' ) as f:
+			lines = f.readlines() 
 
 		loadedRoom = []
 		for line in lines:
