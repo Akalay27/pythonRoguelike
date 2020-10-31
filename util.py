@@ -5,7 +5,6 @@ def lerp(prevVal,newVal,amnt):
 	return prevVal+add
 
 class Point:
-
 	def __init__ (self,x,y):
 		self.x = x
 		self.y = y
@@ -13,7 +12,6 @@ class Point:
 		return int(self.x),int(self.y)
 	def __str__(self):
 		return "({},{})".format(self.x, self.y)
-
 class Rect:
 
 	def __init__ (self,x1,y1,x2,y2):
@@ -37,9 +35,9 @@ def sliceTilemap(img,size,scaleSize=None):
 	'''turns tilemap into array of pygame.Surface'''
 	frames = []
 
-	for y in range(0,img.get_height(),size):
-		for x in range(0,img.get_width(),size):
+	for y in range(0,img.get_height(),size[1]):
+		for x in range(0,img.get_width(),size[0]):
 			if scaleSize != None:
-				frames.append(pygame.transform.scale(img.subsurface((x,y,size,size)),(scaleSize)))
+				frames.append(pygame.transform.scale(img.subsurface((x,y,size[0],size[1])),(scaleSize)))
 	return frames
 

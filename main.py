@@ -5,6 +5,7 @@ from map import *
 from util import *
 from animationController import *
 from player import *
+import enemy
 		
 class Game:
 	CANVAS_WIDTH = 1000
@@ -26,8 +27,11 @@ class Game:
 		self.cameraPos = Point(0,0)
 
 		self.clock = pygame.time.Clock()
+		
+
 		self.gameLoop()
 
+		
 
 	def gameLoop(self):
 		
@@ -47,6 +51,30 @@ class Game:
 			self.player.move(self)
 			self.player.draw(self)
 			self.map.draw(self,background=False)
+			
+			playerTilePos = Point(int(self.player.pos.x//self.map.tileSize), int(self.player.pos.y//self.map.tileSize))
+			currentRoom = self.map.roomAt(playerTilePos.x,playerTilePos.y)
+
+			standingOnDoor = False
+			for door in currentRoom.doors:
+
+				for t in door.tiles:
+
+					if t.x == playerTilePos.x and t.y == playerTilePos.y:
+						standingOnDoor = True
+						break
+				if standingOnDoor: break
+			if standingOnDoor:
+				currentRoom.entering = True
+			if not standingOnDoor and currentRoom.entering == True:
+
+				currentRoom.activateRoom()
+			currentRoom.checkCompleted()
+			self.player.attackingEnemies = currentRoom.enemies
+
+
+
+
 			
 			#put player in center of start room
 			print(self.clock.get_fps())

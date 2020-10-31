@@ -12,7 +12,7 @@ class AnimationController(object):
 		state = AnimationController.AnimationState(name,frames,speed,loop)
 
 		self.states.append(state)	
-
+		
 	def setState(self,name):
 		for state in self.states:
 			if state.name == name:
@@ -49,7 +49,12 @@ class AnimationController(object):
 				
 		def getFrame(self):
 			if not self.stillFrame:
-				frame = int(((time.time()-self.startTime)/self.speed)%len(self.frames))
+				if self.loop == True:
+					frame = int(((time.time()-self.startTime)/self.speed)%len(self.frames))
+				else:
+					frame = int((time.time()-self.startTime)/self.speed)
+					if frame >= len(self.frames):
+						frame = len(self.frames)-1
 			else:
 				frame = 0
 			return self.frames[frame]
